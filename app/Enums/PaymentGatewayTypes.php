@@ -19,7 +19,7 @@ enum PaymentGatewayTypes: string
     public function displayName(): string
     {
         return match($this) {
-            self::CREDIT_CARD => 'Credit/Debit Card',
+            self::CREDIT_CARD => 'Credit Card',
             self::PAYPAL => 'PayPal',
             self::BANK_TRANSFER => 'Bank Transfer',
             self::STRIPE => 'Stripe',

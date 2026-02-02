@@ -3,6 +3,7 @@
 namespace App\Architecture\Services\Payment\Gateways;
 
 use App\Architecture\Services\Payment\Contracts\IPaymentGateway;
+use Illuminate\Support\Arr;
 
 class CreditCardGateway implements IPaymentGateway
 {
@@ -16,9 +17,14 @@ class CreditCardGateway implements IPaymentGateway
     public function charge(float $amount, array $options = []): array
     {
         // Simulate credit card processing
-        // In real implementation, integrate with Stripe/Authorize.net etc.
 
-        $success = rand(0, 1) === 1; // Simulate random success/failure
+        if (!Arr::has($options, 'card_holder')) {
+            $success = false;
+            $failReason = 'Please enter your card holder';
+        } else {
+            $success = rand(0, 1) === 1; // Simulate random success/failure
+            $failReason = '';
+        }
 
         if ($success) {
             $transactionId = 'cc_' . uniqid();
@@ -38,7 +44,7 @@ class CreditCardGateway implements IPaymentGateway
         return [
             'success' => false,
             'transaction_id' => null,
-            'message' => 'Credit card payment failed',
+            'message' => $failReason ?: 'Credit card payment failed',
             'gateway_response' => [
                 'error_code' => 'CC_DECLINED',
                 'error_message' => 'Payment declined by bank'
