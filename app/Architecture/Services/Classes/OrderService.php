@@ -46,7 +46,8 @@ class OrderService implements IOrderService
     public function list(string $status = null, int $perPage = 10): JsonResponse
     {
         try {
-            $orders = $this->orderRepository->listBy($status ? ['status' => $status] : [], $perPage);
+            $filters = $status ? ['status' => $status, 'user_id' => auth()->id()] : ['user_id' => auth()->id()];
+            $orders = $this->orderRepository->listBy($filters, $perPage);
             return $this->apiHttpResponder->sendSuccess((new OrderResource($orders))->toArray(request()), Response::HTTP_OK);
         } catch (\Throwable $exception) {
             return $this->apiHttpResponder->sendError($exception->getMessage(), Response::HTTP_BAD_GATEWAY);

@@ -15,6 +15,6 @@ class OrderRepository extends AbstractRepository implements IOrderRepository
      */
     public function listBy(array $conditions = [], int $perPage = 10): LengthAwarePaginator
     {
-        return $this->prepareQuery()->where($conditions)->paginate($perPage);
+        return $this->prepareQuery()->where($conditions)->with('user')->paginate($perPage);
     }
 }

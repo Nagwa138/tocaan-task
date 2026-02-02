@@ -15,6 +15,7 @@ class OrderObserver
             $order->order_number = $this->generateOrderNumber();
         }
     }
+
     protected function generateOrderNumber(): string
     {
         // Format: ORD-YYYYMMDD-XXXXX

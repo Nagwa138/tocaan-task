@@ -2,13 +2,16 @@
 
 namespace App\Http\Requests\API\Order;
 
+use App\Architecture\Repositories\Interfaces\IOrderRepository;
 use Illuminate\Foundation\Http\FormRequest;
 
 class OrderUpdateStatusRequest extends FormRequest
 {
-    public function authorize(): true
+    public function authorize(): bool
     {
-        return true;
+        // Check if user can process payment for this order
+        if (!$this->getId()) return true;
+        else return $this->user()->can('update', app(IOrderRepository::class)->first(['id' => $this->getId()]));
     }
 
     /**

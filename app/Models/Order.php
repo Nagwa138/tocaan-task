@@ -28,6 +28,7 @@ class Order extends Model
 
     protected $casts = [
         'items' => 'array',
+        'total_amount' => 'float',
     ];
 
     public function user(): BelongsTo

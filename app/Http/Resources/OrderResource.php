@@ -13,7 +13,7 @@ class OrderResource extends AbstractResource
             'id' => $item->id,
             'order_number' => $item->order_number,
             'status' => $item->status,
-            'total_amount' => $item->total_amount,
+            'total_amount' => (float) $item->total_amount,
             'items' => $item->items,
             'notes' => $item->notes,
             'created_at' => $item->created_at?->format('F j, Y g:i A'),
