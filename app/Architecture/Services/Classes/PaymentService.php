@@ -160,9 +160,9 @@ class PaymentService implements IPaymentService
 //            DB::rollBack();
             // TODO :: Log::critical('Payment processing critical error')
 
-            if ($e instanceof ValidationException) {
+            if ($e instanceof ModelNotFoundException) {
                 return $this->apiHttpResponder->sendError('Order not found', Response::HTTP_NOT_FOUND);
-            } else if ($e instanceof ModelNotFoundException) {
+            } else if ($e instanceof ValidationException) {
                 return $this->apiHttpResponder->sendError($e->getMessage(), Response::HTTP_UNPROCESSABLE_ENTITY);
             } else {
                 return $this->apiHttpResponder->sendError('An unexpected error occurred while processing your payment', Response::HTTP_INTERNAL_SERVER_ERROR);
