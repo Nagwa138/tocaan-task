@@ -2,16 +2,24 @@
 
 namespace App\Providers;
 
-use Illuminate\Support\ServiceProvider;
+use App\Models\Order;
+use App\Observers\OrderObserver;
+use App\Policies\OrderPolicy;
+//use Illuminate\Support\ServiceProvider;
+use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
 {
+    protected $policies = [
+        Order::class => OrderPolicy::class,
+    ];
+
     /**
      * Register any application services.
      */
     public function register(): void
     {
-        //
+
     }
 
     /**
@@ -19,6 +27,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        $this->registerPolicies();
+
+        Order::observe(OrderObserver::class);
     }
 }

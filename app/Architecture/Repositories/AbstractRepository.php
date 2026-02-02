@@ -44,8 +44,8 @@ abstract class AbstractRepository
         $this->model->find($id)->delete();
     }
 
-    public function paginate()
+    public function paginate(array $conditions = [], int $perPage = 10)
     {
-        return $this->model->paginate();
+        return $this->model->where($conditions)->paginate($perPage);
     }
 }

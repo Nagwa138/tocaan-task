@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\API;
 
 use App\Architecture\Responder\IApiHttpResponder;
-use App\Http\Requests\API\Login;
-use App\Http\Requests\API\Register;
+use App\Http\Requests\API\Auth\Login;
+use App\Http\Requests\API\Auth\Register;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
