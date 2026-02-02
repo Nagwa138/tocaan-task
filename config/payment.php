@@ -27,7 +27,7 @@ return [
             'client_secret' => env('PAYPAL_CLIENT_SECRET'),
             'mode' => env('PAYPAL_MODE', 'sandbox'),
             'validation_rules' => [
-                // rules
+                'payer_email' => ['required', 'email'],
             ]
         ],
         'bank_transfer' => [
@@ -43,5 +43,6 @@ return [
     'enabled_gateways' => [
         'credit_card',
         'paypal',
+        'bank_transfer',
     ]
 ];

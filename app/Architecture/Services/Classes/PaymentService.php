@@ -12,11 +12,14 @@ use App\Http\Resources\PaymentResource;
 use App\Models\Order;
 use App\Models\Payment;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Foundation\Exceptions\Renderer\Exception;
+use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 use Throwable;
 
 class PaymentService implements IPaymentService
@@ -57,13 +60,18 @@ class PaymentService implements IPaymentService
      */
     public function process(string $orderId, string $paymentMethod): JsonResponse
     {
-        DB::beginTransaction();
+//        DB::beginTransaction();
 
         try {
             // Step 1: Get the authenticated user's order with proper authorization
             $order = $this->orderRepository->first(['id' => $orderId]);
+
+            $this->checkOrderIsConfirmed($orderId);
+
             // Step 2: Validate payment gateway using enum
             $gatewayType = $this->checkPaymentMethod($paymentMethod);
+
+            $this->checkHasSuccessfulPayment($orderId);
 
             $this->checkForPaymentDuplication($orderId);
 
@@ -129,7 +137,7 @@ class PaymentService implements IPaymentService
             }
 
             // Step 7: Commit transaction
-            DB::commit();
+//            DB::commit();
 
             // Step 8: Prepare response data
             $responseData = [
@@ -145,26 +153,20 @@ class PaymentService implements IPaymentService
             ];
 
             // Step 9: Return appropriate HTTP response
-            $statusCode = $gatewayResponse['success'] ? Response::HTTP_CREATED : Response::HTTP_BAD_REQUEST;
+            $statusCode = $gatewayResponse['success'] ? Response::HTTP_CREATED : Response::HTTP_PAYMENT_REQUIRED;
 
             return $this->apiHttpResponder->sendSuccess($responseData, $statusCode);
-
-        } catch (ModelNotFoundException $e) {
-            DB::rollBack();
-
-            return $this->apiHttpResponder->sendError('Order not found', Response::HTTP_NOT_FOUND);
-        } catch (ValidationException $e) {
-            DB::rollBack();
-
-            // TODO :: Log::error('Payment processing exception');
-
-            throw $e;
-        } catch (\Exception $e) {
-            DB::rollBack();
-
+        } catch (Throwable $e) {
+//            DB::rollBack();
             // TODO :: Log::critical('Payment processing critical error')
 
-            return $this->apiHttpResponder->sendError('An unexpected error occurred while processing your payment', Response::HTTP_INTERNAL_SERVER_ERROR);
+            if ($e instanceof ValidationException) {
+                return $this->apiHttpResponder->sendError('Order not found', Response::HTTP_NOT_FOUND);
+            } else if ($e instanceof ModelNotFoundException) {
+                return $this->apiHttpResponder->sendError($e->getMessage(), Response::HTTP_UNPROCESSABLE_ENTITY);
+            } else {
+                return $this->apiHttpResponder->sendError('An unexpected error occurred while processing your payment', Response::HTTP_INTERNAL_SERVER_ERROR);
+            }
         }
     }
 
@@ -216,6 +218,30 @@ class PaymentService implements IPaymentService
             ValidationException::withMessages([
                 'order' => 'A payment attempt for this order was recently made. Please wait a few minutes.'
             ])
+        );
+    }
+
+    /**
+     * @throws Throwable
+     */
+    private function checkOrderIsConfirmed(string $orderId): void
+    {
+        throw_unless(
+            $this->orderRepository->first(['id' => $orderId, 'status' => 'confirmed']),
+            ValidationException::withMessages([
+                'order' => 'The order is not ready to be paid.'
+            ])
+        );
+    }
+
+    /**
+     * @throws Throwable
+     */
+    private function checkHasSuccessfulPayment(string $orderId): void
+    {
+        throw_if(
+            $this->paymentRepository->first(['order_id' => $orderId, 'status' => 'successful']),
+            ValidationException::withMessages(['order' => 'Order has been paid before.'])
         );
     }
 

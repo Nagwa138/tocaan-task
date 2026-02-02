@@ -238,7 +238,8 @@ Add to enabled gateways in `config/payment.php`:
 ### 2. PayPal Gateway
 - **Method:** `paypal`
 - **Supports Refund:** ✅ Yes
-- **No Required Fields:**
+- **Required Fields:**
+    - `payer_email` (valid email)
 
 ### 3. Bank Transfer
 - **Method:** `bank_transfer`

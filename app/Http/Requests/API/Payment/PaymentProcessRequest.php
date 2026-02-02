@@ -26,7 +26,7 @@ class PaymentProcessRequest extends FormRequest
         $baseRules = [
             'order' => ['required', 'exists:orders,id'],
             'method' => ['required', 'string', Rule::in(PaymentGatewayTypes::enabled())],
-            'gateway_data' => 'required|array',
+            'gateway_data' => 'nullable|array',
         ];
 
         if ($gatewayRules = config("payment.gateways.{$this->input('method')}.validation_rules")) {
