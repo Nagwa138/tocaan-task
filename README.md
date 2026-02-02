@@ -373,7 +373,7 @@ This project is for assessment purposes.
 
 ## 📧 Contact
 
-Project Maintainer - Nagwa Ali (nnnnali123@gmail.com.com)
+Project Maintainer - Nagwa Ali (nnnnali123@gmail.com)
 
 ---
 
